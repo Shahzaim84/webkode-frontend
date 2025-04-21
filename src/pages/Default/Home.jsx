@@ -14,6 +14,8 @@ import {
   AiOutlineSecurityScan,
 } from "react-icons/ai";
 
+import PageTransition from "../../PageTransition";
+
 const Home = () => {
   // Refs for GSAP animations
   const heroRef = useRef();
@@ -291,4 +293,4 @@ const steps = [
   },
 ];
 
-export default Home;
+export default PageTransition(Home);

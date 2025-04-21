@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
+import PageTransition from '../../PageTransition';
 
 const ChangePassword = () => {
     const [password, setPassword] = useState('');
@@ -189,4 +190,4 @@ const ChangePassword = () => {
     );
 };
 
-export default ChangePassword;
+export default PageTransition(ChangePassword);

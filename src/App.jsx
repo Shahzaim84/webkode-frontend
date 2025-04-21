@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import './App.css'
+import { AnimatePresence } from 'framer-motion'
 import Login from './pages/Auth/Login'
 import Register from './pages/Auth/Register'
 import ForgotPassword from './pages/Auth/ForgotPassword'
@@ -11,6 +12,7 @@ function App() {
 
   return (
     <div>
+      <AnimatePresence>
       <Routes>
         <Route path="/" element={<Home/>}/>
         <Route path="/login" element={<Login/>}/>
@@ -19,8 +21,10 @@ function App() {
         <Route path="/otpverification" element={<OTPVerification/>}/>
         <Route path="/changepassword" element={<ChangePassword/>}/>
       </Routes>
+      </AnimatePresence>
     </div>
   )
 }
+
 
 export default App

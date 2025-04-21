@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { Link, useNavigate } from 'react-router-dom';
+import PageTransition from '../../PageTransition';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -152,4 +153,4 @@ const ForgotPassword = () => {
   );
 };
 
-export default ForgotPassword;
+export default PageTransition(ForgotPassword);

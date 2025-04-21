@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
+import PageTransition from '../../PageTransition';
 
 const Register = () => {
   const [email, setEmail] = useState('');
@@ -200,4 +201,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default PageTransition(Register);

@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
+import PageTransition from '../../PageTransition';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -211,4 +212,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default PageTransition(Login);

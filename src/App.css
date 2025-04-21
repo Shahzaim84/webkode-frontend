@@ -1,0 +1,59 @@
+/* .slide-in{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: #fe121a;
+    transform-origin: bottom;
+}
+
+.text-container {
+    color: red;
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.slide-out{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: #fe121a;
+    transform-origin: top;
+} */
+
+.slide-in {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: #fe121a;
+    transform-origin: bottom;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.text-container {
+    color: white;
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.slide-out {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: #fe121a;
+    transform-origin: top;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}

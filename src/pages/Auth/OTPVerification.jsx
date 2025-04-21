@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import PageTransition from '../../PageTransition';
 
 const OTPVerification = () => {
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -230,4 +231,4 @@ const OTPVerification = () => {
     );
 };
 
-export default OTPVerification;
+export default PageTransition(OTPVerification);
