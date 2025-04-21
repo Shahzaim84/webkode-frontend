@@ -3,6 +3,8 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import PageTransition from '../../PageTransition';
+import toast from 'react-hot-toast';
+import axios from "axios";
 
 const OTPVerification = () => {
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -98,15 +100,72 @@ const OTPVerification = () => {
         return true;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (validate()) {
-            if(Isregister) {    
-                navigate('/register');
+            let url ;
+            let navigate2 ;
+            if(Isregister){
+                url = `${import.meta.env.VITE_BACKEND_URL}/auth/otpcheck/account-verified`
+                navigate2 = "/login";
             }else{
-                navigate('/changepassword');
+                url = `${import.meta.env.VITE_BACKEND_URL}/auth/otpcheck/changepassword`
+                navigate2 = "/changepassword";
             }
+            try {
+                const response = await axios.post(
+                  url,
+                  {
+                    otp: otp.join("")
+                  },
+                  {
+                    headers:{
+                        Authorization: `Bearer ${sessionStorage.getItem("token")}`
+                      }
+                  }
+                );
+                if (response.status === 200) {
+                    toast.success("Verified Successfully");
+                    if(Isregister){
+                        sessionStorage.removeItem("token", response.data.token);
+                    }
+                  return navigate(navigate2);
+                }
+              } catch (error) {
+                console.log(error);
+                toast.error(
+                  error?.response?.data?.message[0].msg || error?.response?.data?.message || "Oops! Something went wrong"
+                );
+              }
         }
+    };
+
+    const resendOtp = async () => {
+            setTimeLeft(300);
+            setResendCooldown(60);
+            let url ;
+            if(Isregister){
+                url = `${import.meta.env.VITE_BACKEND_URL}/auth/otpresend/account-verified`
+            }else{
+                url = `${import.meta.env.VITE_BACKEND_URL}/auth/otpresend/changepassword`
+            }
+            try {
+                const response = await axios.get(url,
+                  {
+                    headers:{
+                        Authorization: `Bearer ${sessionStorage.getItem("token")}`
+                      }
+                  }
+                );
+                if (response.status === 200) {
+                    toast.success("OTP Send Successfully");
+                }
+              } catch (error) {
+                console.log(error);
+                toast.error(
+                  error?.response?.data?.message[0].msg || error?.response?.data?.message || "Oops! Something went wrong"
+                );
+              }
     };
 
     const formatTime = (seconds) => {
@@ -200,10 +259,7 @@ const OTPVerification = () => {
                                 <button
                                     type="button"
                                     disabled={resendCooldown > 0}
-                                    onClick={() => {
-                                        setTimeLeft(300);
-                                        setResendCooldown(60);
-                                    }}
+                                    onClick={resendOtp}
                                     className={`font-semibold underline underline-offset-4 transition-colors ${resendCooldown > 0
                                             ? 'text-gray-400 cursor-not-allowed'
                                             : 'text-[#fe121a] hover:text-[#ff5258] cursor-pointer'

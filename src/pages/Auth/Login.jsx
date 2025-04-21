@@ -1,9 +1,12 @@
-import { useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
 import PageTransition from '../../PageTransition';
+import { DeveloperDataContext } from "../../context/DeveloperContext";
+import toast from 'react-hot-toast';
+import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -15,6 +18,7 @@ const Login = () => {
   const illustrationRef = useRef(null);
 
     const navigate = useNavigate(); 
+    const { setDeveloper } = useContext(DeveloperDataContext);
 
   useGSAP(() => {
     // Initial animations
@@ -65,11 +69,29 @@ const Login = () => {
     return Object.values(newErrors).every(error => !error);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     if (validate()) {
-      // Submit logic
-      navigate("/register");
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/auth/login`,
+          {
+            email,
+            password,
+          }
+        );
+        if (response.status === 200) {
+          toast.success("Login Successfully");
+          localStorage.setItem("token", response.data.token);
+          setDeveloper(response.data.user)
+          return navigate("/dashboard");
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error(
+          error?.response?.data?.message[0].msg || error?.response?.data?.message || "Oops! Something went wrong"
+        );
+      }
     }
   };
 
@@ -185,25 +207,6 @@ const Login = () => {
                   Get Started
                 </Link>
               </div>
-
-              {/* Social Login */}
-              {/* <div className="flex items-center gap-4 pt-8">
-                <div className="flex-1 h-px bg-[#e5e7eb]"></div>
-                <span className="text-gray-400 text-sm">Or continue with</span>
-                <div className="flex-1 h-px bg-[#e5e7eb]"></div>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                {['GitHub', 'Google', 'SSO'].map((provider) => (
-                  <button
-                    key={provider}
-                    className="flex items-center justify-center gap-2 p-3 rounded-xl border border-[#e5e7eb] 
-                             hover:border-[#fe121a]/30 hover:bg-red-50/50 transition-colors text-gray-600"
-                  >
-                    <span className="text-lg">{provider === 'GitHub' ? '💻' : provider === 'Google' ? '🔍' : '🔑'}</span>
-                    {provider}
-                  </button>
-                ))}
-              </div> */}
             </div>
           </form>
         </div>

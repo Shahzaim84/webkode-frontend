@@ -4,6 +4,8 @@ import { useGSAP } from '@gsap/react';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
 import PageTransition from '../../PageTransition';
+import toast from 'react-hot-toast';
+import axios from "axios";
 
 const ChangePassword = () => {
     const [password, setPassword] = useState('');
@@ -63,11 +65,30 @@ const ChangePassword = () => {
         return Object.values(newErrors).every(error => !error);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (validate()) {
-            // Submit logic
-            navigate('/login');
+            try {
+                const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/changepassword`,
+                  {
+                    password
+                  },
+                  {
+                    headers:{
+                        Authorization: `Bearer ${sessionStorage.getItem("token")}`
+                      }
+                  }
+                );
+                if (response.status === 200) {
+                    toast.success("Password Changed Successfully");
+                    return navigate("/login");
+                }
+              } catch (error) {
+                console.log(error);
+                toast.error(
+                  error?.response?.data?.message[0].msg || error?.response?.data?.message || "Oops! Something went wrong"
+                );
+              }
         }
     };
 

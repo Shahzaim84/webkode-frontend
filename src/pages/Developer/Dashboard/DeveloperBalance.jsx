@@ -1,0 +1,225 @@
+import { useEffect, useState } from "react";
+import {
+  FiDollarSign,
+  FiRefreshCw,
+} from "react-icons/fi";
+import Chart from "react-apexcharts";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../../../components/Developer/Dashboard/Navbar";
+
+const DeveloperBalance = () => {
+  const [balanceData, setBalanceData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+  // Mock data - replace with actual API call
+  useEffect(() => {
+    const fetchBalanceData = async () => {
+      try {
+        // Simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        const mockData = {
+          currentBalance: 52450.0,
+          lastUpdated: new Date().toISOString(),
+          history: {
+            week: [50000, 51200, 50800, 51500, 52000, 52250, 52450],
+            month: [48000, 49000, 50500, 51000, 51500, 52000, 52500, 52450],
+          },
+        };
+
+        setBalanceData(mockData);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching balance:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchBalanceData();
+  }, []);
+
+  // Chart configuration
+  const chartOptions = {
+    chart: {
+      type: "line",
+      height: 350,
+      zoom: {
+        enabled: false,
+      },
+      toolbar: {
+        show: false,
+      },
+    },
+    stroke: {
+      curve: "smooth",
+      width: 3,
+    },
+    colors: ["#fe121a"],
+    markers: {
+      size: 5,
+      colors: ["#fe121a"],
+      strokeWidth: 0,
+    },
+    grid: {
+      show: false,
+    },
+    xaxis: {
+      categories: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      labels: {
+        style: {
+          colors: "#6b7280",
+        },
+      },
+    },
+    yaxis: {
+      labels: {
+        formatter: (value) => `₹${value.toLocaleString()}`,
+        style: {
+          colors: "#6b7280",
+        },
+      },
+    },
+    tooltip: {
+      x: {
+        formatter: (value) => `Day ${value + 1}`,
+      },
+    },
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse bg-gray-200 rounded-lg p-6 w-96">
+          <div className="h-8 bg-gray-300 rounded w-1/2 mb-4"></div>
+          <div className="h-12 bg-gray-300 rounded w-3/4 mb-4"></div>
+          <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!balanceData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-600">
+        Failed to load balance data
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#fff8f8] to-[#fafafa] flex flex-col md:flex-row">
+        <Navbar location="Balance"/>
+      <div className="flex-1 p-6 md:p-8 max-w-6xl mx-auto">
+        {/* Balance Card */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-200">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <FiDollarSign className="w-12 h-12 text-red-600 p-2 bg-red-50 rounded-xl" />
+              <div>
+                <h2 className="text-xl font-semibold text-gray-600">
+                  Current Balance
+                </h2>
+                <p className="text-4xl font-bold text-gray-900 mt-1">
+                  ₹{balanceData.currentBalance.toLocaleString("en-IN")}
+                </p>
+              </div>
+            </div>
+
+            <div className="text-right">
+              <p className="text-sm text-gray-500 flex items-center space-x-2">
+                <FiRefreshCw className="w-4 h-4" />
+                <span>
+                  Updated: {new Date(balanceData.lastUpdated).toLocaleString()}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Balance Chart */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">
+              7-Day Balance Trend
+            </h3>
+            <div className="flex space-x-4">
+              <button className="text-sm text-red-600 font-medium">
+                1 Week
+              </button>
+              <button className="text-sm text-gray-500 hover:text-gray-900">
+                1 Month
+              </button>
+            </div>
+          </div>
+
+          <div className="h-96">
+            <Chart
+              options={chartOptions}
+              series={[
+                {
+                  name: "Balance",
+                  data: balanceData.history.week,
+                },
+              ]}
+              type="line"
+              height="100%"
+            />
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="mt-8 bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Recent Transactions
+          </h3>
+          <div className="space-y-4">
+            {[
+              {
+                date: "2024-03-25",
+                amount: "+₹52,300",
+                description: "Salary Deposit",
+              },
+              {
+                date: "2024-03-24",
+                amount: "-₹2,450",
+                description: "Utility Payment",
+              },
+              {
+                date: "2024-03-23",
+                amount: "-₹15,000",
+                description: "Investment",
+              },
+            ].map((transaction, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                <div>
+                  <p className="font-medium text-gray-900">
+                    {transaction.description}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(transaction.date).toLocaleDateString()}
+                  </p>
+                </div>
+                <p
+                  className={`text-lg font-semibold ${
+                    transaction.amount.startsWith("+")
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {transaction.amount}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DeveloperBalance;

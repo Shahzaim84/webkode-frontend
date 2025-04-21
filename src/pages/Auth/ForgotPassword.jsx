@@ -3,6 +3,8 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { Link, useNavigate } from 'react-router-dom';
 import PageTransition from '../../PageTransition';
+import toast from 'react-hot-toast';
+import axios from "axios";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -60,11 +62,26 @@ const ForgotPassword = () => {
     return Object.values(newErrors).every(error => !error);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validate()) {
-      // Simulate API call
-      navigate('/otpverification', { state: { Isregister: false } });
+      try {
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/forgotpassword`,
+          {
+            email
+          }
+        );
+        if (response.status === 200) {
+            toast.success("OTP Send Successfully");
+            sessionStorage.setItem("token", response.data.token);
+            return navigate('/otpverification', { state: { Isregister: false } });
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error(
+          error?.response?.data?.message[0].msg || error?.response?.data?.message || "Oops! Something went wrong"
+        );
+      }
     }
   };
 
