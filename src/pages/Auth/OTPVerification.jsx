@@ -101,9 +101,9 @@ const OTPVerification = () => {
         e.preventDefault();
         if (validate()) {
             if(Isregister) {    
-            navigate('/login');
-            }else{
                 navigate('/register');
+            }else{
+                navigate('/changepassword');
             }
         }
     };
