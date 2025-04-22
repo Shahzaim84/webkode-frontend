@@ -1,209 +1,167 @@
-import { useState, useEffect } from 'react';
-import { FiUser, FiMail, FiLock, FiBriefcase, FiX } from 'react-icons/fi';
+import { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { IoCloseSharp } from "react-icons/io5";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const UserModal = ({ isOpen, onClose, user }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'developer',
-    status: 'active'
-  });
-  
-  const [passwordStrength, setPasswordStrength] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || '',
-        email: user.email || '',
-        password: '',
-        role: user.role || 'developer',
-        status: user.status || 'active'
-      });
+  const validate = () => {
+    const newErrors = { name: "", email: "", password: "" };
+    if (name.length < 3) {
+      newErrors.name = "Name must be at least 3 characters";
     }
-  }, [user]);
-
-  const calculatePasswordStrength = (password) => {
-    let strength = 0;
-    if (password.length >= 8) strength += 1;
-    if (password.match(/[A-Z]/)) strength += 1;
-    if (password.match(/[0-9]/)) strength += 1;
-    if (password.match(/[^A-Za-z0-9]/)) strength += 1;
-    return strength;
+    if (!email.match(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/)) {
+      newErrors.email = "Please enter a valid email";
+    }
+    if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    }
+    setErrors(newErrors);
+    return Object.values(newErrors).every((error) => !error);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    
-    // Simple validation
-    const newErrors = {};
-    if (!formData.name) newErrors.name = 'Name is required';
-    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Valid email is required';
+    if (validate()) {
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/admin/createuser`,
+          {
+            fullname: name,
+            email,
+            password,
+            role: "Developer"
+          },
+          {
+            headers: {
+              "Authorization": `Bearer ${localStorage.getItem("token")}`
+            }
+          }
+        );
+        if (response.status === 200) {
+          toast.success("Registered Successfully");
+          setName("");
+          setEmail("");
+          setPassword("");
+          onClose(); 
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error(
+          error?.response?.data?.message[0].msg || error?.response?.data?.message || "Oops! Something went wrong"
+        );
+      }
     }
-    if (!user && !formData.password) newErrors.password = 'Password is required';
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setLoading(false);
-      return;
-    }
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    onClose(); // Close modal after submission
-    setLoading(false);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md relative">
-        {/* Modal Header */}
-        <div className="flex justify-between items-center p-6 border-b dark:border-gray-700">
-          <h3 className="text-xl font-semibold">
-            {user ? 'Edit User' : 'Create New User'}
-          </h3>
-          <button 
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-          >
-            <FiX className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="space-y-4">
-            {/* Name Field */}
-            <div>
-              <label className="text-sm font-medium mb-1 flex items-center gap-2">
-                <FiUser className="w-4 h-4" />
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className={`w-full p-2.5 rounded-lg border ${
-                  errors.name ? 'border-red-500' : 'dark:border-gray-700'
-                } dark:bg-gray-900`}
-              />
-              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-            </div>
-
-            {/* Email Field */}
-            <div>
-              <label className="text-sm font-medium mb-1 flex items-center gap-2">
-                <FiMail className="w-4 h-4" />
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className={`w-full p-2.5 rounded-lg border ${
-                  errors.email ? 'border-red-500' : 'dark:border-gray-700'
-                } dark:bg-gray-900`}
-              />
-              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-            </div>
-
-            {/* Password Field */}
-            {!user && (
-              <div>
-                <label className="text-sm font-medium mb-1 flex items-center gap-2">
-                  <FiLock className="w-4 h-4" />
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => {
-                    setFormData({...formData, password: e.target.value});
-                    setPasswordStrength(calculatePasswordStrength(e.target.value));
-                  }}
-                  className={`w-full p-2.5 rounded-lg border ${
-                    errors.password ? 'border-red-500' : 'dark:border-gray-700'
-                  } dark:bg-gray-900`}
-                />
-                <div className="mt-2 flex gap-1">
-                  {[...Array(4)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`h-1 flex-1 rounded-full ${
-                        i < passwordStrength ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'
-                      }`}
-                    />
-                  ))}
-                </div>
-                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
-              </div>
-            )}
-
-            {/* Role and Status */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-1 flex items-center gap-2">
-                  <FiBriefcase className="w-4 h-4" />
-                  Role
-                </label>
-                <select
-                  value={formData.role}
-                  onChange={(e) => setFormData({...formData, role: e.target.value})}
-                  className="w-full p-2.5 rounded-lg border dark:border-gray-700 dark:bg-gray-900"
-                >
-                  <option value="developer">Developer</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Status
-                </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({...formData, status: e.target.value})}
-                  className="w-full p-2.5 rounded-lg border dark:border-gray-700 dark:bg-gray-900"
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-            </div>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="flex items-center justify-center">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full bg-white/90 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-[#e5e7eb] relative"
+        >
+          <IoCloseSharp className="text-[#fe121a] cursor-pointer absolute top-4 right-4" size={40} onClick={()=> onClose()}/>
+          
+          <div className="mb-8 space-y-2">
+            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-[#fe121a] to-[#ff5258] bg-clip-text text-transparent">
+              Create User
+            </h1>
           </div>
 
-          {/* Modal Footer */}
-          <div className="mt-6 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              Cancel
-            </button>
+          <div className="space-y-6">
+            {/* Name Input */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">
+                Fullname
+              </label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={`w-full px-4 py-3 rounded-xl border ${
+                  errors.name
+                    ? "border-red-500"
+                    : "border-[#e5e7eb] hover:border-[#fe121a]/30"
+                } focus:ring-2 focus:ring-[#fe121a]/50 focus:border-transparent transition-all outline-none`}
+                placeholder="developerahsan"
+              />
+              {errors.name && (
+                <p className="text-red-500 text-sm animate-shake">
+                  {errors.name}
+                </p>
+              )}
+            </div>
+
+            {/* Email Input */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">Email</label>
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`w-full px-4 py-3 rounded-xl border ${
+                  errors.email
+                    ? "border-red-500"
+                    : "border-[#e5e7eb] hover:border-[#fe121a]/30"
+                } focus:ring-2 focus:ring-[#fe121a]/50 focus:border-transparent transition-all outline-none`}
+                placeholder="developer@company.com"
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm animate-shake">
+                  {errors.email}
+                </p>
+              )}
+            </div>
+
+            {/* Password Input */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`w-full px-4 py-3 rounded-xl border ${
+                    errors.password
+                      ? "border-red-500"
+                      : "border-[#e5e7eb] hover:border-[#fe121a]/30"
+                  } focus:ring-2 focus:ring-[#fe121a]/50 focus:border-transparent transition-all pr-12 outline-none`}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-2 p-2 text-gray-400 hover:text-[#fe121a] transition-colors cursor-pointer"
+                >
+                  {showPassword ? (
+                    <FaEye size={20} />
+                  ) : (
+                    <FaEyeSlash size={20} />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-red-500 text-sm animate-shake">
+                  {errors.password}
+                </p>
+              )}
+            </div>
+
             <button
               type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              className="w-full py-3.5 px-6 bg-gradient-to-r from-[#fe121a] to-[#ff5258] text-white rounded-xl font-semibold 
+                              hover:shadow-lg hover:shadow-red-100 transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer"
             >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Processing...
-                </>
-              ) : (
-                <>
-                  {user ? 'Save Changes' : 'Create User'}
-                </>
-              )}
+              Create User
             </button>
           </div>
         </form>

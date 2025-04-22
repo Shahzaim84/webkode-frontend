@@ -16,6 +16,7 @@ import DeveloperInvoice from "./pages/Developer/Dashboard/DeveloperInvoice";
 import AdminDashboard from "./pages/Admin/Dashboard/AdminDashboard";
 import DeveloperProtectorWrapper from "./Wrapper/DeveloperProtectorWrapper";
 import { Toaster } from "react-hot-toast";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
@@ -82,6 +83,7 @@ function App() {
                 <AdminDashboard />
             }
           />
+        <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AnimatePresence>
       <Toaster/>

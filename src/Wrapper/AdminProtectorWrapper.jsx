@@ -2,13 +2,13 @@ import React, { useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
-import { DeveloperDataContext } from '../context/DeveloperContext';
+import { AdminDataContext } from '../context/AdminContext';
 
 const DeveloperProtectorWrapper = ({children}) => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
-  const { setDeveloper } = useContext(DeveloperDataContext); 
+  const { setAdmin } = useContext(AdminDataContext); 
   useEffect(()=>{
     tokenChecker();
   },[token])
@@ -21,7 +21,7 @@ const DeveloperProtectorWrapper = ({children}) => {
         navigate("/login");
         return 
       }
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/token-verify`,
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/admin/token-verify`,
         {
           headers:{
             Authorization: `Bearer ${token}`
@@ -46,9 +46,6 @@ const DeveloperProtectorWrapper = ({children}) => {
         toast.error("First Verify Your Email");
         sessionStorage.setItem("token", token);
         return navigate("/otpverification", {state: {Isregister: true}});
-      }else if(error.status === 403){
-        toast.error("Subcribed First");
-        return navigate("/pricing")
       }
         console.log(error);
       }

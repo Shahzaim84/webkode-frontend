@@ -5,6 +5,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
 import PageTransition from '../../PageTransition';
 import { DeveloperDataContext } from "../../context/DeveloperContext";
+import { AdminDataContext } from "../../context/AdminContext";
 import toast from 'react-hot-toast';
 import axios from "axios";
 
@@ -19,6 +20,7 @@ const Login = () => {
 
     const navigate = useNavigate(); 
     const { setDeveloper } = useContext(DeveloperDataContext);
+    const { setAdmin } = useContext(AdminDataContext);
 
   useGSAP(() => {
     // Initial animations
@@ -83,8 +85,15 @@ const Login = () => {
         if (response.status === 200) {
           toast.success("Login Successfully");
           localStorage.setItem("token", response.data.token);
-          setDeveloper(response.data.user)
-          return navigate("/dashboard");
+          localStorage.setItem("tp", response.data.tp);
+          if(response.data.tp === "dv"){
+            setDeveloper(response.data.user)
+            return navigate("/dashboard");
+          }else{
+            setAdmin(response.data.user)
+            return navigate("/admin/dashboard");
+          }
+            
         }
       } catch (error) {
         console.log(error);
