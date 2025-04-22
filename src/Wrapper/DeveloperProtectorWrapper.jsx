@@ -47,7 +47,7 @@ const DeveloperProtectorWrapper = ({children}) => {
         sessionStorage.setItem("token", token);
         return navigate("/otpverification", {state: {Isregister: true}});
       }else if(error.status === 403){
-        toast.error("Subcribed First");
+        toast.error(error?.response?.data?.message || "Oops! Something went wrong");
         return navigate("/pricing")
       }
         console.log(error);

@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from 'react';
+import { useContext, useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -23,6 +23,17 @@ const Login = () => {
     const navigate = useNavigate(); 
     const { setDeveloper } = useContext(DeveloperDataContext);
     const { setAdmin } = useContext(AdminDataContext);
+
+    useEffect(() => {
+      const token = localStorage.getItem("token");
+      const tp = localStorage.getItem("tp");
+      if(token && tp === "dv"){
+        return navigate("/dashboard");
+      }else if(token && tp === "ad"){
+        return navigate("/admin/dashboard");
+      }
+    }, []);
+    
 
   useGSAP(() => {
     // Initial animations

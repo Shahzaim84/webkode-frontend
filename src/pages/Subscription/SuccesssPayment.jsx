@@ -20,7 +20,7 @@ const SuccesssPayment = () => {
       const fetchPaymentDetails = async () => {
         try {
           const response = await axios.post(
-            `${import.meta.env.VITE_BACKEND_URL}/subscription/subscribe`,
+            `${import.meta.env.VITE_BACKEND_URL}/subscriptions/subscribe`,
         {
           sessionId
         },

@@ -4,6 +4,7 @@ import Chart from "react-apexcharts";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Developer/Dashboard/Navbar";
 import axios from "axios"; // Import axios to make HTTP requests
+import toast from "react-hot-toast";
 
 const DeveloperBalance = () => {
   const [balanceData, setBalanceData] = useState(null);
@@ -28,7 +29,9 @@ const DeveloperBalance = () => {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching balance:", error);
-        setError("Failed to load balance data"); // Set error state
+        toast.error(
+          error?.response?.data?.message || "Oops! Something went wrong"
+        );
         setLoading(false);
       }
     };

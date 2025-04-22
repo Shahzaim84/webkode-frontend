@@ -29,7 +29,7 @@ const AdminProtectorWrapper = ({children}) => {
         }
       )
       if(response.status === 200){
-        setDeveloper(response.data.UserDetails);
+        setAdmin(response.data.UserDetails);
       }
     }catch(error){
       if(error.status === 401){

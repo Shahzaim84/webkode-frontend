@@ -79,7 +79,7 @@ const Pricing = () => {
     setBtnLoading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/subscription/payment`,
+        `${import.meta.env.VITE_BACKEND_URL}/subscriptions/payment`,
         {
           susbscriptionType: plan,
         },

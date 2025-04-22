@@ -145,7 +145,7 @@ const DeveloperInvoice = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600">Total Amount</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  ₹{invoiceData.totalAmount.toLocaleString("en-IN")}
+                  ${invoiceData.totalAmount.toLocaleString("en-IN")}
                 </p>
               </div>
             </div>

@@ -46,6 +46,27 @@ const DeveloperDashboard = () => {
       fetchBalanceData();
     }, []);
 
+    const CancelSubscribe = async () => {
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/subscriptions/cancel`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        toast.success("UnSubscribed Successfully");
+        navigate("/pricing");
+      } catch (error) {
+        console.error("Error fetching balance:", error);
+        toast.error(
+          error?.response?.data?.message || "Oops! Something went wrong"
+        );
+      }
+    };
+
     function extractTransactionIds(transactionString) {
       // Regular expression to match both IDs
       const regex = /from (\S+) to (\S+)/;
@@ -126,9 +147,8 @@ const DeveloperDashboard = () => {
               <p className="text-3xl md:text-4xl font-bold mb-2">${balance}</p>
               <p>Account Id: "{developer?._id || "N/A"}"</p>
             </div>
-            <button className="bg-white/10 backdrop-blur-sm text-white px-5 py-2.5 rounded-xl hover:bg-white/20 transition-all flex items-center space-x-2 border border-white/20 w-full md:w-auto justify-center" onClick={()=> navigate("dashboard/transactions")}>
-              <FiArrowUpRight className="w-5 h-5" />
-              <span className="font-medium">View Transaction</span>
+            <button className="bg-white/10 backdrop-blur-sm text-white px-5 py-2.5 rounded-xl hover:bg-white/20 transition-all flex items-center space-x-2 border border-white/20 w-full md:w-auto justify-center cursor-pointer" onClick={CancelSubscribe}>
+              <span className="font-medium">Cancel Subscription</span>
             </button>
           </div>
         </div>

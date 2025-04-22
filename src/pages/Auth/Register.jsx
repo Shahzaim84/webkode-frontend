@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -18,6 +18,16 @@ const Register = () => {
   const formRef = useRef(null);
   const illustrationRef = useRef(null);
   const [btnLoading, setBtnLoading] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const tp = localStorage.getItem("tp");
+    if (token && tp === "dv") {
+      return navigate("/dashboard");
+    } else if (token && tp === "ad") {
+      return navigate("/admin/dashboard");
+    }
+  }, []);
 
   const navigate = useNavigate();
 
