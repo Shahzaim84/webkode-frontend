@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import PageTransition from '../../PageTransition';
 import toast from 'react-hot-toast';
 import axios from "axios";
+import { BeatLoader } from "react-spinners";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -13,6 +14,7 @@ const ForgotPassword = () => {
   const containerRef = useRef(null);
   const formRef = useRef(null);
   const illustrationRef = useRef(null);
+  const [btnLoading, setBtnLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -63,6 +65,7 @@ const ForgotPassword = () => {
   };
 
   const handleSubmit = async (e) => {
+    setBtnLoading(true);
     e.preventDefault();
     if (validate()) {
       try {
@@ -83,6 +86,7 @@ const ForgotPassword = () => {
         );
       }
     }
+    setBtnLoading(false);
   };
 
   return (
@@ -146,12 +150,16 @@ const ForgotPassword = () => {
                 </div>
 
                 <button
-                  type="submit"
-                  className="w-full py-3.5 px-6 bg-gradient-to-r from-[#fe121a] to-[#ff5258] text-white rounded-xl font-semibold 
-                           hover:shadow-lg hover:shadow-red-100 transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer"
-                >
-                    Send OTP
-                </button>
+                type="submit"
+                className={`w-full py-3.5 px-6  rounded-xl font-semibold 
+                         hover:shadow-lg hover:shadow-red-100 transition-all transform hover:scale-[1.02] active:scale-95 ${
+                          btnLoading
+                            ? "bg-[#fe8a8e] text-gray-300 cursor-not-allowed"
+                            : "bg-[#fe121a] text-white cursor-pointer"
+                        }`}
+              >
+                {btnLoading ? <BeatLoader color="#fff" size={10} /> : "Send OTP"}
+              </button>
 
                 <div className="text-center text-sm text-gray-600">
                   Remember your password?{' '}

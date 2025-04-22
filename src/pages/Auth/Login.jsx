@@ -8,6 +8,7 @@ import { DeveloperDataContext } from "../../context/DeveloperContext";
 import { AdminDataContext } from "../../context/AdminContext";
 import toast from 'react-hot-toast';
 import axios from "axios";
+import { BeatLoader } from "react-spinners";
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -17,6 +18,7 @@ const Login = () => {
   const containerRef = useRef(null);
   const formRef = useRef(null);
   const illustrationRef = useRef(null);
+  const [btnLoading, setBtnLoading] = useState(false);
 
     const navigate = useNavigate(); 
     const { setDeveloper } = useContext(DeveloperDataContext);
@@ -72,6 +74,7 @@ const Login = () => {
   };
 
   const handleSubmit = async(e) => {
+    setBtnLoading(true);
     e.preventDefault();
     if (validate()) {
       try {
@@ -102,6 +105,7 @@ const Login = () => {
         );
       }
     }
+    setBtnLoading(false);
   };
 
   return (
@@ -192,10 +196,14 @@ const Login = () => {
 
               <button
                 type="submit"
-                className="w-full py-3.5 px-6 bg-gradient-to-r from-[#fe121a] to-[#ff5258] text-white rounded-xl font-semibold 
-                         hover:shadow-lg hover:shadow-red-100 transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer"
+                className={`w-full py-3.5 px-6  rounded-xl font-semibold 
+                         hover:shadow-lg hover:shadow-red-100 transition-all transform hover:scale-[1.02] active:scale-95 ${
+                          btnLoading
+                            ? "bg-[#fe8a8e] text-gray-300 cursor-not-allowed"
+                            : "bg-[#fe121a] text-white cursor-pointer"
+                        }`}
               >
-                Login
+                {btnLoading ? <BeatLoader color="#fff" size={10} /> : "login"}
               </button>
 
               <div className="text-left text-sm text-gray-600 -mt-2">

@@ -15,6 +15,8 @@ import {
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Developer/Dashboard/Navbar";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const DeveloperInvoice = () => {
   const [startDate, setStartDate] = useState(null);
@@ -24,28 +26,38 @@ const DeveloperInvoice = () => {
 
   const navigate = useNavigate();
 
-  // Mock API call
   const generateInvoice = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Mock response
-    setInvoiceData({
-      transactionCount: 15,
-      totalAmount: 45230,
-      startDate,
-      endDate,
-    });
+    // Simulate API call to backend
+    try {
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/invoice?start=${startDate.toISOString()}&end=${endDate.toISOString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        setInvoiceData(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error generating invoice:", error);
+      toast.error(
+        error?.response?.data?.message || "Oops! Something went wrong"
+      );
+    }
 
     setLoading(false);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fff8f8] to-[#fafafa] flex flex-col md:flex-row">
-        <Navbar location="Invoice"/>
+      <Navbar location="Invoice" />
       <div className="flex-1 p-6 md:p-8 max-w-6xl mx-auto">
         <h1 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
           <FiFileText className="w-6 h-6 text-red-600" />
@@ -126,7 +138,7 @@ const DeveloperInvoice = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600">Total Transactions</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {invoiceData.transactionCount}
+                  {invoiceData.totalTransactions}
                 </p>
               </div>
 
@@ -138,13 +150,15 @@ const DeveloperInvoice = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => console.log("Download PDF")}
+            <a
+              href={`${import.meta.env.VITE_BACKEND_URL2}/invoices/${invoiceData.filename}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-full bg-gray-900 text-white py-2.5 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
             >
               <FiDownload className="w-4 h-4" />
               Download PDF Invoice
-            </button>
+            </a>
 
             <p className="text-center text-gray-500 text-sm mt-4">
               Invoice generated for selected period -{" "}

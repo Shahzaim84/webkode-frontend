@@ -1,19 +1,83 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   FiArrowUpRight,
   FiList,
   FiFileText,
   FiUser,
   FiActivity,
+  FiSend,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Developer/Dashboard/Navbar";
+import { DeveloperDataContext } from '../../../context/DeveloperContext';
+import axios from "axios";
+import toast from "react-hot-toast";
+import { GiReceiveMoney } from "react-icons/gi";
+
 
 const DeveloperDashboard = () => {
-
+  const [balance, setBalance] = useState(0);
+  const [transactions, setTransactions] = useState([])
+  const {developer} = useContext(DeveloperDataContext)
   const navigate = useNavigate();
 
-  const user = { name: "John" };
+  useEffect(() => {
+      const fetchBalanceData = async () => {
+        try {
+          const response = await axios.get(
+            `${import.meta.env.VITE_BACKEND_URL}/dashboard`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          setBalance(response.data.balance);
+          setTransactions(response.data.transactions);
+          toast.success("Welcome Back");
+        } catch (error) {
+          console.error("Error fetching balance:", error);
+          toast.error(
+            error?.response?.data?.message || "Oops! Something went wrong"
+          );
+        }
+      };
+  
+      fetchBalanceData();
+    }, []);
+
+    function extractTransactionIds(transactionString) {
+      // Regular expression to match both IDs
+      const regex = /from (\S+) to (\S+)/;
+    
+      // Execute the regex on the string
+      const match = transactionString.match(regex);
+    
+      if (match) {
+        const sourceId = match[1]; 
+        return sourceId;
+      } else {
+        return null; // If no match is found
+      }
+    }
+
+    const formatDate = (timestamp) => {
+      const date = new Date(timestamp); // Convert the timestamp to a Date object
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short', 
+        year: 'numeric',  
+        month: 'short',   
+        day: 'numeric'    
+      });
+    };
+  
+    const formatAmount = (amount) => {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD', // You can change this to any currency code you prefer
+      }).format(amount);
+    };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fff8f8] to-[#fafafa] flex flex-col md:flex-row">
@@ -25,7 +89,7 @@ const DeveloperDashboard = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div className="mb-4 md:mb-0">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1.5">
-              Welcome back, <span className="text-red-600">{user.name}</span>!
+              Welcome back, <span className="text-red-600">{developer?.fullname}</span>!
               👋
             </h1>
             <p className="text-gray-500 text-sm md:text-base">
@@ -59,62 +123,14 @@ const DeveloperDashboard = () => {
               <h2 className="text-sm font-medium mb-3 opacity-90">
                 Available Balance
               </h2>
-              <p className="text-3xl md:text-4xl font-bold mb-6">₹12,450</p>
+              <p className="text-3xl md:text-4xl font-bold mb-2">${balance}</p>
+              <p>Account Id: "{developer?._id || "N/A"}"</p>
             </div>
-            <button className="bg-white/10 backdrop-blur-sm text-white px-5 py-2.5 rounded-xl hover:bg-white/20 transition-all flex items-center space-x-2 border border-white/20 w-full md:w-auto justify-center">
+            <button className="bg-white/10 backdrop-blur-sm text-white px-5 py-2.5 rounded-xl hover:bg-white/20 transition-all flex items-center space-x-2 border border-white/20 w-full md:w-auto justify-center" onClick={()=> navigate("dashboard/transactions")}>
               <FiArrowUpRight className="w-5 h-5" />
-              <span className="font-medium">New Transaction</span>
+              <span className="font-medium">View Transaction</span>
             </button>
           </div>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
-          {[
-            {
-              title: "API Usage",
-              value: "1,234 Calls",
-              icon: <FiActivity className="w-6 h-6 text-red-600" />,
-              change: "+12% from last month",
-              color: "bg-red-50",
-            },
-            {
-              title: "Active Services",
-              value: "8 Running",
-              icon: <FiList className="w-6 h-6 text-green-600" />,
-              change: "2 New services",
-              color: "bg-green-50",
-            },
-            {
-              title: "Pending Invoices",
-              value: "₹2,450",
-              icon: <FiFileText className="w-6 h-6 text-purple-600" />,
-              change: "1 Unpaid invoice",
-              color: "bg-purple-50",
-            },
-          ].map((stat, index) => (
-            <div
-              key={index}
-              className="bg-white p-4 md:p-6 rounded-xl shadow-xs border border-gray-100 hover:shadow-sm transition-shadow"
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-gray-500 text-sm font-medium mb-2 md:mb-4">
-                    {stat.title}
-                  </h3>
-                  <p className="text-xl md:text-2xl font-bold text-gray-900 mb-1 md:mb-2">
-                    {stat.value}
-                  </p>
-                  <span className="text-gray-500 text-xs md:text-sm">
-                    {stat.change}
-                  </span>
-                </div>
-                <div className={`${stat.color} p-2 md:p-3 rounded-lg`}>
-                  {stat.icon}
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
 
         {/* Recent Activity */}
@@ -123,42 +139,77 @@ const DeveloperDashboard = () => {
             <h2 className="text-lg font-semibold text-gray-900 mb-2 md:mb-0">
               Recent Transactions
             </h2>
-            <button className="text-red-600 text-sm font-medium flex items-center space-x-1">
+            <button className="text-red-600 text-sm font-medium flex items-center space-x-1" onClick={()=> navigate("dashboard/transactions")}>
               <span>View All</span>
               <FiArrowUpRight className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="space-y-3 md:space-y-4">
-            {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="flex flex-col md:flex-row items-start md:items-center justify-between p-3 md:p-4 hover:bg-gray-50 rounded-lg transition-colors"
-              >
-                <div className="flex items-center space-x-3 mb-2 md:mb-0">
-                  <div className="bg-red-50 p-2 rounded-lg">
-                    <FiArrowUpRight className="w-5 h-5 text-red-600" />
+           {/* Transactions Table */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="hidden md:grid grid-cols-5 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200">
+                      <span className="col-span-2">Description</span>
+                      <span>Date</span>
+                      <span>Type</span>
+                      <span className="text-right">Amount</span>
+                    </div>
+          
+                    {transactions.length > 0 ? (
+                      transactions.map((transaction) => (
+                        <div
+                          key={transaction._id}
+                          className="group p-6 md:py-4 border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
+                            <div className="col-span-2 flex items-center gap-3">
+                              <div
+                                className={`p-2 rounded-lg ${
+                                  extractTransactionIds(transaction?.description) === developer?._id
+                                    ? "bg-red-100 text-red-600"
+                                    : "bg-green-100 text-green-600"
+                                }`}
+                              >
+                                {extractTransactionIds(transaction?.description) === developer?._id ? (
+                                  <FiSend className="w-5 h-5" />
+                                ) : (
+                                  <GiReceiveMoney className="w-5 h-5" />
+                                )}
+                              </div>
+                              <span className="font-medium">
+                                {transaction.description}
+                              </span>
+                            </div>
+          
+                            <div className="text-gray-600">
+                              {formatDate(transaction.timestamp)}
+                            </div>
+          
+                            <div className="hidden md:block">
+                              <span
+                                className={`px-2 py-1 rounded-full text-sm capitalize ${
+                                  extractTransactionIds(transaction?.description) === developer?._id
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-red-100 text-red-700"
+                                }`}
+                              >
+                                {extractTransactionIds(transaction?.description) === developer?._id ? "Send" : "Receive"}
+                              </span>
+                            </div>
+          
+                            <div
+                              className={`text-right font-medium ${
+                                transaction.amount > 0 ? "text-green-600" : "text-red-600"
+                              }`}
+                            >
+                              {formatAmount(transaction.amount)}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-6 text-center">No transactions found</div>
+                    )}
                   </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900 text-sm md:text-base">
-                      API Subscription
-                    </h3>
-                    <p className="text-xs md:text-sm text-gray-500">
-                      12 Oct 2023 • 14:32
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium text-gray-900 text-sm md:text-base">
-                    - ₹1,999
-                  </p>
-                  <p className="text-xs md:text-sm text-gray-500">
-                    Standard Plan
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </main>
     </div>

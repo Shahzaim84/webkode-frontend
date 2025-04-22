@@ -15,8 +15,11 @@ import DeveloperTransaction from "./pages/Developer/Dashboard/DeveloperTransacti
 import DeveloperInvoice from "./pages/Developer/Dashboard/DeveloperInvoice";
 import AdminDashboard from "./pages/Admin/Dashboard/AdminDashboard";
 import DeveloperProtectorWrapper from "./Wrapper/DeveloperProtectorWrapper";
+import AdminProtectorWrapper from "./Wrapper/AdminProtectorWrapper";
 import { Toaster } from "react-hot-toast";
 import NotFoundPage from "./pages/NotFoundPage";
+import CancelPayment from "./pages/Subscription/CancelPayment";
+import SuccesssPayment from "./pages/Subscription/SuccesssPayment";
 
 function App() {
   return (
@@ -80,9 +83,21 @@ function App() {
           <Route
             path="/admin/dashboard"
             element={
+              <AdminProtectorWrapper>
                 <AdminDashboard />
+              </AdminProtectorWrapper>
             }
           />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminProtectorWrapper>
+                <AdminDashboard />
+              </AdminProtectorWrapper>
+            }
+          />
+        <Route path="/success" element={<SuccesssPayment />} />
+        <Route path="/cancel" element={<CancelPayment />} />
         <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AnimatePresence>

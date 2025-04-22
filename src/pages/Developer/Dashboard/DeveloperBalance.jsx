@@ -1,38 +1,34 @@
 import { useEffect, useState } from "react";
-import {
-  FiDollarSign,
-  FiRefreshCw,
-} from "react-icons/fi";
+import { FiDollarSign, FiRefreshCw } from "react-icons/fi";
 import Chart from "react-apexcharts";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Developer/Dashboard/Navbar";
+import axios from "axios"; // Import axios to make HTTP requests
 
 const DeveloperBalance = () => {
   const [balanceData, setBalanceData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // State for error handling
 
   const navigate = useNavigate();
 
-  // Mock data - replace with actual API call
+  // Fetch balance data from the backend API
   useEffect(() => {
     const fetchBalanceData = async () => {
       try {
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        const mockData = {
-          currentBalance: 52450.0,
-          lastUpdated: new Date().toISOString(),
-          history: {
-            week: [50000, 51200, 50800, 51500, 52000, 52250, 52450],
-            month: [48000, 49000, 50500, 51000, 51500, 52000, 52500, 52450],
-          },
-        };
-
-        setBalanceData(mockData);
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/balance`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        setBalanceData(response.data.account); // Set the balance data
         setLoading(false);
       } catch (error) {
         console.error("Error fetching balance:", error);
+        setError("Failed to load balance data"); // Set error state
         setLoading(false);
       }
     };
@@ -75,7 +71,7 @@ const DeveloperBalance = () => {
     },
     yaxis: {
       labels: {
-        formatter: (value) => `₹${value.toLocaleString()}`,
+        formatter: (value) => `$${value.toLocaleString()}`, // Change currency symbol to USD
         style: {
           colors: "#6b7280",
         },
@@ -88,6 +84,21 @@ const DeveloperBalance = () => {
     },
   };
 
+
+  // Random data for chart
+  // const randomData = [
+  //   Math.floor(Math.random() * 10000), // Random values for testing
+  //   Math.floor(Math.random() * 10000),
+  //   Math.floor(Math.random() * 10000),
+  //   Math.floor(Math.random() * 10000),
+  //   Math.floor(Math.random() * 10000),
+  //   Math.floor(Math.random() * 10000),
+  //   Math.floor(Math.random() * 10000),
+  // ];
+
+  const randomData = Array.from({ length: 7 }, () => Math.floor(Math.random() * 10000));
+
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -100,17 +111,30 @@ const DeveloperBalance = () => {
     );
   }
 
-  if (!balanceData) {
+  // Error state
+  if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center text-red-600">
-        Failed to load balance data
+        {error}
+      </div>
+    );
+  }
+
+  // Balance data not found
+  if (!balanceData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#fff8f8] to-[#fafafa] flex flex-col md:flex-row">
+        <Navbar location="Balance" />
+        <div className="lex-1 p-6 md:p-8 max-w-6xl mx-auto text-[#fe121a] text-6xl font-bold">
+          Failed to load balance data
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fff8f8] to-[#fafafa] flex flex-col md:flex-row">
-        <Navbar location="Balance"/>
+      <Navbar location="Balance" />
       <div className="flex-1 p-6 md:p-8 max-w-6xl mx-auto">
         {/* Balance Card */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-200">
@@ -122,7 +146,10 @@ const DeveloperBalance = () => {
                   Current Balance
                 </h2>
                 <p className="text-4xl font-bold text-gray-900 mt-1">
-                  ₹{balanceData.currentBalance.toLocaleString("en-IN")}
+                  {balanceData.balance.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}
                 </p>
               </div>
             </div>
@@ -155,66 +182,9 @@ const DeveloperBalance = () => {
           </div>
 
           <div className="h-96">
-            <Chart
-              options={chartOptions}
-              series={[
-                {
-                  name: "Balance",
-                  data: balanceData.history.week,
-                },
-              ]}
-              type="line"
-              height="100%"
-            />
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="mt-8 bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Recent Transactions
-          </h3>
-          <div className="space-y-4">
-            {[
-              {
-                date: "2024-03-25",
-                amount: "+₹52,300",
-                description: "Salary Deposit",
-              },
-              {
-                date: "2024-03-24",
-                amount: "-₹2,450",
-                description: "Utility Payment",
-              },
-              {
-                date: "2024-03-23",
-                amount: "-₹15,000",
-                description: "Investment",
-              },
-            ].map((transaction, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors"
-              >
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {transaction.description}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(transaction.date).toLocaleDateString()}
-                  </p>
-                </div>
-                <p
-                  className={`text-lg font-semibold ${
-                    transaction.amount.startsWith("+")
-                      ? "text-green-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {transaction.amount}
-                </p>
-              </div>
-            ))}
+            <Chart options={chartOptions}
+            series={[{ name: "Balance", data: randomData }]} // Random data for
+            balance type="line" height="100%" />
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FiHome,
@@ -16,6 +16,12 @@ const Navbar = (props) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navigate = useNavigate();
+
+  const logout = ()=>{
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+    navigate("/login");
+  }
 
   return (
     <>
@@ -94,6 +100,7 @@ const Navbar = (props) => {
           <button
             // onClick={handleLogout}
             className="flex items-center gap-2 text-white hover:bg-[#c1000f] bg-[#fe121a] px-8 rounded-md shadow-2xl py-4 transition-colors cursor-pointer"
+            onClick={logout}
           >
             <FiLogOut className="w-5 h-5 font-semibold" />
             <span className="font-medium">Logout</span>

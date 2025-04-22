@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import PageTransition from "../../PageTransition";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
+import { BeatLoader } from "react-spinners";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -16,6 +17,7 @@ const Register = () => {
   const containerRef = useRef(null);
   const formRef = useRef(null);
   const illustrationRef = useRef(null);
+  const [btnLoading, setBtnLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -72,6 +74,7 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
+    setBtnLoading(true);
     e.preventDefault();
     if (validate()) {
       try {
@@ -81,7 +84,7 @@ const Register = () => {
             fullname: name,
             email,
             password,
-            role: "Developer"
+            role: "Developer",
           }
         );
         if (response.status === 200) {
@@ -92,10 +95,13 @@ const Register = () => {
       } catch (error) {
         console.log(error);
         toast.error(
-          error?.response?.data?.message[0].msg || error?.response?.data?.message || "Oops! Something went wrong"
+          error?.response?.data?.message[0].msg ||
+            error?.response?.data?.message ||
+            "Oops! Something went wrong"
         );
       }
     }
+    setBtnLoading(false);
   };
 
   return (
@@ -254,10 +260,18 @@ const Register = () => {
 
               <button
                 type="submit"
-                className="w-full py-3.5 px-6 bg-gradient-to-r from-[#fe121a] to-[#ff5258] text-white rounded-xl font-semibold 
-                         hover:shadow-lg hover:shadow-red-100 transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer"
+                className={`w-full py-3.5 px-6  rounded-xl font-semibold 
+                         hover:shadow-lg hover:shadow-red-100 transition-all transform hover:scale-[1.02] active:scale-95 ${
+                           btnLoading
+                             ? "bg-[#fe8a8e] text-gray-300 cursor-not-allowed"
+                             : "bg-[#fe121a] text-white cursor-pointer"
+                         }`}
               >
-                Register
+                {btnLoading ? (
+                  <BeatLoader color="#fff" size={10} />
+                ) : (
+                  "Register"
+                )}
               </button>
 
               <div className="text-center text-sm text-gray-600">

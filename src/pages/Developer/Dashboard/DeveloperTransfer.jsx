@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   FiArrowRight,
   FiDollarSign,
@@ -6,37 +6,39 @@ import {
   FiRefreshCw,
 } from "react-icons/fi";
 import { BsBank2 } from "react-icons/bs";
-import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Developer/Dashboard/Navbar";
+import { DeveloperDataContext } from "../../../context/DeveloperContext";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const DeveloperTransfer = () => {
   const [loading, setLoading] = useState(false);
   const [transferData, setTransferData] = useState({
-    from: "",
-    to: "",
+    accountId: "",
     amount: "",
   });
   const [errors, setErrors] = useState({});
   const [successData, setSuccessData] = useState(null);
-  const navigate = useNavigate();
+  const {developer} = useContext(DeveloperDataContext);
 
-  // Mock accounts - replace with actual data
-  const accounts = [
-    { id: "1", name: "Primary Account •••• 6789", balance: 52450 },
-    { id: "2", name: "Savings Account •••• 4321", balance: 150000 },
-    { id: "3", name: "Business Account •••• 9876", balance: 250000 },
-  ];
+  // Mock account for example — replace with API fetch later
+  const account = {
+    id: "1",
+    name: "Primary Account •••• 6789",
+    balance: 52450,
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Simple validation
     const newErrors = {};
-    if (!transferData.from) newErrors.from = "Please select source account";
-    if (!transferData.to) newErrors.to = "Please select destination account";
-    if (!transferData.amount || isNaN(transferData.amount))
-      newErrors.amount = "Please enter valid amount";
+    if (!transferData.accountId || transferData.accountId.length < 1) {
+      newErrors.accountId = "Please enter a valid Account ID";
+    }
+    if (!transferData.amount || isNaN(transferData.amount)) {
+      newErrors.amount = "Please enter a valid amount";
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -44,15 +46,31 @@ const DeveloperTransfer = () => {
       return;
     }
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    setSuccessData({
-      from: accounts.find((a) => a.id === transferData.from).name,
-      to: accounts.find((a) => a.id === transferData.to).name,
-      amount: transferData.amount,
-      newBalance: 52450 - parseInt(transferData.amount), // Mock balance update
-    });
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/transfer`,
+    {
+      destinationId: transferData.accountId,
+      amount: transferData.amount
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+      );
+      toast.success("Amount Transfer Successfully");
+      setSuccessData({
+        from: developer?._id,
+        amount: transferData.amount,
+        newBalance: response.data.balance,
+      });
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || "Oops! Something went wrong"
+      );
+    }
+    
 
     setLoading(false);
     setErrors({});
@@ -60,8 +78,8 @@ const DeveloperTransfer = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fff8f8] to-[#fafafa] flex flex-col md:flex-row">
-      <Navbar location="Transfer"/>
-      <div className="flex-1 p-6 md:p-8 max-w-6xl mx-auto">
+      <Navbar location="Transfer" />
+      <div className="flex-1 p-6 md:p-8 max-w-2xl mx-auto">
         {!successData ? (
           <form
             onSubmit={handleSubmit}
@@ -73,61 +91,29 @@ const DeveloperTransfer = () => {
                 Transfer Funds
               </h1>
               <p className="text-gray-500 mt-2">
-                Move money between your accounts
+                Enter account ID and transfer amount
               </p>
             </div>
 
-            {/* From Account */}
+            {/* Account ID input */}
             <div className="mb-6">
               <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                 <BsBank2 className="w-4 h-4 text-gray-500" />
-                From Account
+                Account ID
               </label>
-              <select
-                value={transferData.from}
+              <input
+                type="text"
+                value={transferData.accountId}
                 onChange={(e) =>
-                  setTransferData({ ...transferData, from: e.target.value })
+                  setTransferData({ ...transferData, accountId: e.target.value })
                 }
                 className={`w-full p-3 rounded-lg border ${
-                  errors.from ? "border-red-500" : "border-gray-300"
-                } focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all`}
-              >
-                <option value="">Select Source Account</option>
-                {accounts.map((account) => (
-                  <option key={account.id} value={account.id}>
-                    {account.name} (₹{account.balance.toLocaleString()})
-                  </option>
-                ))}
-              </select>
-              {errors.from && (
-                <p className="text-red-500 text-sm mt-1">{errors.from}</p>
-              )}
-            </div>
-
-            {/* To Account */}
-            <div className="mb-6">
-              <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <BsBank2 className="w-4 h-4 text-gray-500" />
-                To Account
-              </label>
-              <select
-                value={transferData.to}
-                onChange={(e) =>
-                  setTransferData({ ...transferData, to: e.target.value })
-                }
-                className={`w-full p-3 rounded-lg border ${
-                  errors.to ? "border-red-500" : "border-gray-300"
-                } focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all`}
-              >
-                <option value="">Select Destination Account</option>
-                {accounts.map((account) => (
-                  <option key={account.id} value={account.id}>
-                    {account.name} (₹{account.balance.toLocaleString()})
-                  </option>
-                ))}
-              </select>
-              {errors.to && (
-                <p className="text-red-500 text-sm mt-1">{errors.to}</p>
+                  errors.accountId ? "border-red-500" : "border-gray-300"
+                } focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none`}
+                placeholder="Enter Account ID"
+              />
+              {errors.accountId && (
+                <p className="text-red-500 text-sm mt-1">{errors.accountId}</p>
               )}
             </div>
 
@@ -138,9 +124,7 @@ const DeveloperTransfer = () => {
                 Amount
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                  ₹
-                </span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                 <input
                   type="number"
                   value={transferData.amount}
@@ -149,7 +133,7 @@ const DeveloperTransfer = () => {
                   }
                   className={`w-full pl-8 p-3 rounded-lg border ${
                     errors.amount ? "border-red-500" : "border-gray-300"
-                  } focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all`}
+                  } focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none`}
                   placeholder="Enter amount"
                 />
               </div>
@@ -162,7 +146,7 @@ const DeveloperTransfer = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-red-600 text-white py-3.5 px-6 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-red-600 text-white py-3.5 px-6 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
                 <>
@@ -194,13 +178,9 @@ const DeveloperTransfer = () => {
                 <span className="font-medium">{successData.from}</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                <span className="text-gray-600">To Account:</span>
-                <span className="font-medium">{successData.to}</span>
-              </div>
-              <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
                 <span className="text-gray-600">Amount Transferred:</span>
                 <span className="font-bold text-red-600">
-                  ₹{successData.amount}
+                  ${successData.amount}
                 </span>
               </div>
             </div>
@@ -210,7 +190,7 @@ const DeveloperTransfer = () => {
               <div>
                 <p className="text-sm text-gray-600">Updated Balance:</p>
                 <p className="font-bold text-gray-900 text-xl">
-                  ₹{successData.newBalance.toLocaleString()}
+                  ${successData.newBalance.toLocaleString()}
                 </p>
               </div>
             </div>

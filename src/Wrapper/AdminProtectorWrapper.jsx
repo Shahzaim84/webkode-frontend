@@ -4,7 +4,7 @@ import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import { AdminDataContext } from '../context/AdminContext';
 
-const DeveloperProtectorWrapper = ({children}) => {
+const AdminProtectorWrapper = ({children}) => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
@@ -59,4 +59,4 @@ const DeveloperProtectorWrapper = ({children}) => {
   )
 }
 
-export default DeveloperProtectorWrapper
+export default AdminProtectorWrapper
