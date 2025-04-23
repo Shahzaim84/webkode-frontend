@@ -242,7 +242,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto text-center">
           <p>
             © 2025 FinConnect. All rights reserved. Developed and Owned by
-            MetaStackers
+            MetaStackers Team
           </p>
         </div>
       </footer>
