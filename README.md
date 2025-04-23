@@ -67,5 +67,8 @@ FRONTEND_URL
 VITE_BACKEND_URL=http://localhost:5000/api
 ```
 
+## Demo Video Link
+https://drive.google.com/file/d/1Tl_WjJkhi0-XcoiCiaGTyGynplDnwq0n/view?usp=drive_link
+
 ---
 
