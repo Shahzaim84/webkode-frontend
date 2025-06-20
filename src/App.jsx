@@ -4,7 +4,7 @@ import { AnimatePresence } from "framer-motion";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
-import OTPVerification from "./pages/Auth/OtpVerification";
+import OTPVerification from "./pages/Auth/OTPVerification";
 import ChangePassword from "./pages/Auth/ChangePassword";
 import Home from "./pages/Default/Home";
 import Pricing from "./pages/Subscription/Pricing";
